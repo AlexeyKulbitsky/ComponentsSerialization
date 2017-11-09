@@ -5,6 +5,7 @@ project (Framework)
 add_subdirectory(../engine "${CMAKE_CURRENT_BINARY_DIR}/engine_build")
 include_directories(../engine/source)
 
+
 file(GLOB_RECURSE FRAMEWORK_SRC "source/*.h" "source/*.hpp" "source/*.cpp")
 
 # Group files according to files organization
@@ -21,7 +22,11 @@ foreach(FILE ${FRAMEWORK_SRC})
       source_group("${GROUP}" FILES "${FILE}")
 endforeach()
   
-add_executable(framework ${FRAMEWORK_SRC})
-target_link_libraries(framework Engine)
+#add_executable(Game ${FRAMEWORK_SRC})
+#target_link_libraries(Game Engine)
+
+add_library(Game SHARED ${FRAMEWORK_SRC})
+target_link_libraries(Game Engine)
+
 
 

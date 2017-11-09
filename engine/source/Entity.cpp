@@ -8,7 +8,7 @@ Entity::Entity()
 }
 
  
-MY_TEST_API Entity* CreateEntity()
+/*MY_TEST_API Entity* CreateEntity()
 {
 	return new Entity();
-}
+}*/

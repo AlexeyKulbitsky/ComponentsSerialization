@@ -3,8 +3,11 @@ cmake_minimum_required(VERSION 3.4.1)
 project (Editor)
 
 # Add engine
-add_subdirectory(../engine "${CMAKE_CURRENT_BINARY_DIR}/engine_build")
-include_directories(../engine/include)
+#add_subdirectory(../engine "${CMAKE_CURRENT_BINARY_DIR}/engine_build")
+include_directories(../engine/source)
+
+# Add game
+add_subdirectory(../game "${CMAKE_CURRENT_BINARY_DIR}/game_build")
 
 set(EDITOR_PROJECT_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/source)
 set(EDITOR_PROJECT_NAME Editor)
@@ -28,5 +31,9 @@ foreach(FILE ${EDITOR_PROJECT_SOURCE_FILES})
 endforeach()
 
 add_executable(${EDITOR_PROJECT_NAME} ${EDITOR_PROJECT_SOURCE_FILES})
-
 target_link_libraries(${EDITOR_PROJECT_NAME} Engine)
+
+add_custom_command(TARGET ${EDITOR_PROJECT_NAME} POST_BUILD
+					COMMAND ${CMAKE_COMMAND} -E copy 
+					${CMAKE_CURRENT_BINARY_DIR}/game_build/$<CONFIGURATION>/Game.dll 
+					${CMAKE_CURRENT_BINARY_DIR}/$<CONFIGURATION>)

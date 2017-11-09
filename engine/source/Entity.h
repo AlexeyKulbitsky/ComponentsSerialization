@@ -4,7 +4,7 @@
 #include "Globals.h"
 #include "Component.h"
 
-class MY_TEST_API Entity
+class Entity
 {
 public:
 	Entity();
@@ -14,7 +14,5 @@ public:
 private:
 	std::vector<Component*> m_components;
 };
-
-extern "C" MY_TEST_API Entity* CreateEntity();
 
 #endif

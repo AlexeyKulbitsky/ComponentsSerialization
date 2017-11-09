@@ -4,6 +4,7 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <string>
 
 #define SHARED_LIB
 
