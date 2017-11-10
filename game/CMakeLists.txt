@@ -2,6 +2,14 @@ cmake_minimum_required(VERSION 3.4.1)
 
 project (Framework)
 
+if(CMAKE_CONFIGURATION_TYPES)
+   list(APPEND CMAKE_CONFIGURATION_TYPES SuperDuper)
+   list(REMOVE_DUPLICATES CMAKE_CONFIGURATION_TYPES)
+   set(CMAKE_CONFIGURATION_TYPES "${CMAKE_CONFIGURATION_TYPES}" CACHE STRING
+     "Add the configurations that we need"
+     FORCE)
+ endif()
+
 add_subdirectory(../engine "${CMAKE_CURRENT_BINARY_DIR}/engine_build")
 include_directories(../engine/source)
 

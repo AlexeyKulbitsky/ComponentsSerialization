@@ -8,7 +8,7 @@ class EyeComponent : public Component
 public:
 	EyeComponent();
 	virtual const char* GetName() const override;
-	virtual void RegisterProperties() override;
+	static void RegisterObject();
 	virtual void PrintDebugInfo() override;
 
 	friend std::ostream& operator<<(std::ostream&, const EyeComponent&);

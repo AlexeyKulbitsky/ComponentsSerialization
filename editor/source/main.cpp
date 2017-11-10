@@ -1,10 +1,8 @@
-#include <ComponentFactory.h>
 #include <serialization/GlobalObjectFactory.h>
 #include <Component.h>
 
 #include <Windows.h>
 #include <iostream>
-
 
 int main()
 {
@@ -14,34 +12,6 @@ int main()
 	{
 		std::cout << "Can not load DLL" << std::endl;
 		return -1;
-	}
-
-	auto functionPointer = GetProcAddress(libraryHandle, "GetFactory");
-	if (!functionPointer)
-	{
-		std::cout << "Can not get function pointer" << std::endl;
-		return -1;
-	}
-
-	// Try to get component factory
-	auto factory = reinterpret_cast<ComponentFactory*>(functionPointer());
-	if (!factory)
-	{
-		std::cout << "Can not get component factory" << std::endl;
-		return -1;
-	}
-
-	// Local component factory test
-	size_t componentsCount = factory->GetComponentCount();
-	for (size_t i = 0; i < componentsCount; ++i)
-	{
-		auto component = factory->GetComponent(i);
-		std::cout << "Component : " << component->GetName() << std::endl;
-		auto properties = component->GetProperties();
-		for (auto prop : properties)
-		{
-			prop->Set(2334.0f);
-		}
 	}
 
 	// Global object factory test
@@ -69,11 +39,8 @@ int main()
 			delete instance;
 	}
 
-	auto printDebugInfoFnPtr = GetProcAddress(libraryHandle, "PrintDebugInfo");
-	if (printDebugInfoFnPtr)
-	{
-		printDebugInfoFnPtr();
-	}
+	// Close library
+	FreeLibrary(libraryHandle);
 
 	return 0;
 }

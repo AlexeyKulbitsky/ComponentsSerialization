@@ -2,39 +2,32 @@
 #define PROPERTY_INCLUDE
 
 #include "../Globals.h"
+#include "Serializable.h"
 
 class Property
 {
 public:
-	enum Type
-	{
-		Int,
-		Float,
-		Boolean,
-
-		Unknown
-	};
-
-	Property(int* dataPtr, const std::string& name);
-	Property(float* dataPtr, const std::string& name);
-	Property(bool* dataPtr, const std::string& name);
-	
-	void Set(const int value);
-	void Set(const float value);
-	void Set(const bool value);
-
-	const int GetInt() const;
-	const float GetFloat() const;
-	const bool GetBool() const;
-
+	Property(const std::string& name) : m_name(name) {}
+	virtual void SetValue(Serializable* object, int value) {}
 	const std::string& GetName() const;
 
-	Type GetType() const { return m_type; }
+private:
+	std::string m_name = "noname";
+};
+
+template<typename ClassType, typename FieldType>
+class PropertyImpl : public Property
+{
+public:
+	PropertyImpl(FieldType ClassType::* ptr, const std::string& name) : Property(name), m_ptr(ptr) {}
+	virtual void SetValue(Serializable* object, int value) override
+	{
+		ClassType* concreteClass = static_cast<ClassType*>(object);
+		(*concreteClass).*m_ptr = value;
+	}
 
 private:
-	Type m_type = Unknown;
-	void* m_dataPtr = nullptr;
-	std::string m_name = "noname";
+	FieldType ClassType::* m_ptr = nullptr;
 };
 
 #endif

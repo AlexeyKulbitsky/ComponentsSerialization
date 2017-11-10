@@ -1,6 +1,7 @@
 #include "EyeComponent.h"
 
 #include "serialization/GlobalObjectFactory.h"
+#include "serialization/Property.h"
 #include <iostream>
 
 EyeComponent::EyeComponent()
@@ -13,10 +14,16 @@ const char* EyeComponent::GetName() const
 	return typeid(EyeComponent).name();
 }
 
-void EyeComponent::RegisterProperties()
+void EyeComponent::RegisterObject()
 {
 	GlobalObjectFactory::GetInstance()->RegisterFactory<EyeComponent>();
-	m_properties.push_back(new Property(&this->size, "size"));
+	Property* prop = new PropertyImpl<EyeComponent, int>(&EyeComponent::size, "size");
+
+	EyeComponent* comp = new EyeComponent();
+	prop->SetValue(comp, 777);
+
+	int a = 0;
+	a++;
 }
 
 void EyeComponent::PrintDebugInfo()
