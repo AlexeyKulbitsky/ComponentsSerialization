@@ -21,7 +21,7 @@ class ObjectFactoryImpl : public ObjectFactory
 public:
 	ObjectFactoryImpl()
 	{
-		m_name = T::GetTypeName();
+		m_name = T::GetTypeNameStatic();
 	}
 	virtual Serializable* CreateObject() override { return new T(); }
 };
@@ -41,21 +41,21 @@ public:
 	template<typename T>
 	void RegisterProperty(Property* property)
 	{
-		m_propertes[T::GetTypeName()][property->GetName()] = property;
+		m_propertes[T::GetTypeNameStatic()][property->GetName()] = property;
 	}
 
 	Property* GetProperty(const std::string& objectTypeName, const std::string& name);
 	template<typename T>
 	Property* GetProperty(const std::string& name)
 	{
-		return GetProperty(T::GetTypeName(), name);
+		return GetProperty(T::GetTypeNameStatic(), name);
 	}
 
 	std::map<std::string, Property*>* GetProperties(const std::string& objectTypeName);
 	template<typename T>
 	std::map<std::string, Property*>* GetProperties()
 	{
-		return GetProperties(T::GetTypeName());
+		return GetProperties(T::GetTypeNameStatic());
 	}
 
 	Serializable* CreateObject(const std::string& type);

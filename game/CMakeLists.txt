@@ -30,11 +30,11 @@ foreach(FILE ${FRAMEWORK_SRC})
       source_group("${GROUP}" FILES "${FILE}")
 endforeach()
   
-#add_executable(Game ${FRAMEWORK_SRC})
-#target_link_libraries(Game Engine)
-
-add_library(Game SHARED ${FRAMEWORK_SRC})
+add_executable(Game ${FRAMEWORK_SRC})
 target_link_libraries(Game Engine)
+
+#add_library(Game SHARED ${FRAMEWORK_SRC})
+#target_link_libraries(Game Engine)
 
 
 

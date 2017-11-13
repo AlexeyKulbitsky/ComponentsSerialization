@@ -21,9 +21,9 @@ template<typename ClassType, typename FieldType>
 class PropertyImpl : public Property
 {
 public:
-	using FiledPtr = FieldType ClassType::*;
+	using FieldPtr = FieldType ClassType::*;
 
-	PropertyImpl(FiledPtr ptr, const std::string& name) : Property(name), m_ptr(ptr) {}
+	PropertyImpl(FieldPtr ptr, const std::string& name) : Property(name), m_ptr(ptr) {}
 	virtual void SetValue(Serializable* object, const Any& value) override
 	{
 		ClassType* concreteClass = static_cast<ClassType*>(object);
@@ -36,7 +36,7 @@ public:
 	}
 
 private:
-	FiledPtr m_ptr = nullptr;
+	FieldPtr m_ptr = nullptr;
 };
 
 template<typename T>

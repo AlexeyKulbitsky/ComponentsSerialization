@@ -22,22 +22,22 @@ void EyeComponent::RegisterObject()
 	S_FIELD_PROPERTY("Name", std::string, name);
 	S_ACCESSOR_PROPERTY("Age", int, GetAge, SetAge);
 
-	EyeComponent* eyeComponent = new EyeComponent();
-
-	auto factory = GlobalObjectFactory::GetInstance();
-	auto ageProperty = factory->GetProperty<EyeComponent>("Age");
-	if (ageProperty)
-	{
-		ageProperty->SetValue(eyeComponent, 2);
-		auto value = ageProperty->GetValue(eyeComponent);
-		int val = value.Get<int>();
-
-		int a = 0;
-		a++;
-	}
-
-	int a = 0;
-	a++;
+// 	EyeComponent* eyeComponent = new EyeComponent();
+// 
+// 	auto factory = GlobalObjectFactory::GetInstance();
+// 	auto ageProperty = factory->GetProperty<EyeComponent>("Age");
+// 	if (ageProperty)
+// 	{
+// 		ageProperty->SetValue(eyeComponent, 2);
+// 		auto value = ageProperty->GetValue(eyeComponent);
+// 		auto type = value.GetType();
+// 
+// 		int a = 0;
+// 		a++;
+// 	}
+// 
+// 	int a = 0;
+// 	a++;
 }
 
 void EyeComponent::PrintDebugInfo()
