@@ -8,6 +8,7 @@ int main()
 
 	EyeComponent* eyeComponent = new EyeComponent();
 	eyeComponent->name = "RightEye";
+	eyeComponent->Serialize();
 
 	HeadComponent* headComponent = new HeadComponent();
 

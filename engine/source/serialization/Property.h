@@ -43,7 +43,7 @@ private:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-template<typename T, bool = std::is_scalar<T>::value, bool = std::is_pointer<T>::value>
+/*template<typename T, bool = std::is_scalar<T>::value, bool = std::is_pointer<T>::value>
 struct ParamTypeTrait
 {
 	using ParamType = T;
@@ -83,15 +83,15 @@ public:
 private:
 	GetterPtr m_getter;
 	SetterPtr m_setter;
-};
+};*/
 
 #define S_FIELD_PROPERTY(name, FieldType, field) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new PropertyImpl<ClassType, FieldType>(&ClassType::field, name))
 
 #define S_FIELD_PROPERTY_EXT(name, FieldType, BaseFieldType, field) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new PropertyImpl<ClassType, FieldType, BaseFieldType>(&ClassType::field, name))
 
-#define S_ACCESSOR_PROPERTY(name, FieldType, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new AccessorPropertyImpl<ClassType, FieldType, ParamTypeTrait<FieldType>>(&ClassType::Getter, &ClassType::Setter, name))
+//#define S_ACCESSOR_PROPERTY(name, FieldType, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new AccessorPropertyImpl<ClassType, FieldType, ParamTypeTrait<FieldType>>(&ClassType::Getter, &ClassType::Setter, name))
 
-#define S_ACCESSOR_PROPERTY_EXT(name, FieldType, BaseFieldType, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new AccessorPropertyImpl<ClassType, FieldType, ParamTypeTrait<FieldType>, BaseFieldType>(&ClassType::Getter, &ClassType::Setter, name))
+//#define S_ACCESSOR_PROPERTY_EXT(name, FieldType, BaseFieldType, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new AccessorPropertyImpl<ClassType, FieldType, ParamTypeTrait<FieldType>, BaseFieldType>(&ClassType::Getter, &ClassType::Setter, name))
 
 
 template<typename ClassType, typename ReturnType, typename ArgumentType>
@@ -100,7 +100,24 @@ class AccessorPropertyImplExt : public Property
 public:
 	using GetterPtr = ReturnType(ClassType::*)() const;
 	using SetterPtr = void (ClassType::*) (ArgumentType);
-	static_assert(std::is_same<std::remove_cv<ReturnType>, std::remove_cv<ArgumentType>>::value, "The return and argument type differs from each other");
+
+	using NoPtrReturnType = std::remove_pointer<ReturnType>;
+	using NoPtrArgumentType = std::remove_pointer<ArgumentType>;
+
+	static_assert(std::is_same<NoPtrReturnType, NoPtrReturnType>::value, 
+				  "The return and argument type differs from each other");
+
+	template<typename T, bool = std::is_base_of<Serializable, T>::value>
+	struct BaseType
+	{
+		using Type = T;
+	};
+
+	template<typename T>
+	struct BaseType<T, true>
+	{
+		using Type = Serializable*;
+	};
 
 	AccessorPropertyImplExt(GetterPtr getter, SetterPtr setter, const std::string& name)
 		: Property(name)
@@ -110,12 +127,12 @@ public:
 	virtual void SetValue(Serializable* object, const Variant& value) override
 	{
 		ClassType* concreteClass = static_cast<ClassType*>(object);
-		//(concreteClass->*m_setter)(value.Get<BaseType>());
+		(concreteClass->*m_setter)((ArgumentType)value.Get<BaseType<std::remove_pointer_t<ReturnType>>::Type>());
 	}
 	virtual Variant GetValue(Serializable* object) override
 	{
 		ClassType* concreteClass = static_cast<ClassType*>(object);
-		return Variant((concreteClass->*m_getter)());
+		return Variant((BaseType<std::remove_pointer_t<ReturnType>>::Type)(concreteClass->*m_getter)());
 	}
 
 private:
@@ -134,6 +151,6 @@ Property* CreateProperty(Getter<ClassType, ReturnType> getter, Setter<ClassType,
 	return new AccessorPropertyImplExt<ClassType, ReturnType, ArgumentType>(getter, setter, name);
 }
 
-//#define S_ACCESSOR_PROPERTY_TEST(name, FieldType, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateProperty<FieldType>(&ClassType::Getter, &ClassType::Setter, name))
+#define S_ACCESSOR_PROPERTY(name, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateProperty(&ClassType::Getter, &ClassType::Setter, name))
 
 #endif

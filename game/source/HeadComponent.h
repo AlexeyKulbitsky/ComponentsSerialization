@@ -12,14 +12,15 @@ public:
 	virtual const char* GetName() const override;
 	static void RegisterObject();
 
-	void SetEyeComponent(EyeComponent* c) { eyeComponent = c; }
-	EyeComponent* GetEyeComponent() const { return eyeComponent; }
-
 	void Set(EyeComponent* c) { eyeComponent = c; }
 	const EyeComponent* Get() const { return eyeComponent; }
 
+	void SetBrainWeight(const float weight) { m_brainWeight = weight; }
+	float GetBrainWeight() const { return m_brainWeight; }
+
 private:
 	EyeComponent* eyeComponent = nullptr;
+	float m_brainWeight = 2.3f;
 };
 
 #endif
