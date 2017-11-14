@@ -18,7 +18,7 @@ void Serializer::Serialize(Serializable* serializable)
 
 		switch (type)
 		{
-		case ANY_SERIALIZABLE:
+		case VAR_SERIALIZABLE:
 		{
 			auto s = value.Get<Serializable*>();
 			std::cout << s->GetTypeName() << std::endl;

@@ -12,12 +12,16 @@ const char* HeadComponent::GetName() const
 {
 	return typeid(HeadComponent).name();
 }
-template<> struct TypeToAnyType<EyeComponent*> { enum { Type = ANY_SERIALIZABLE }; };
 
 void HeadComponent::RegisterObject()
 {
 	GlobalObjectFactory::GetInstance()->RegisterFactory<HeadComponent>();
 	
-	S_FIELD_PROPERTY("EyeComponent", EyeComponent*, eyeComponent);
+	//S_FIELD_PROPERTY_EXT("EyeComponent", EyeComponent*, Serializable*, eyeComponent);
+
+	S_ACCESSOR_PROPERTY_EXT("EyeComponent", EyeComponent*, Serializable*, GetEyeComponent, SetEyeComponent);
+	//S_ACCESSOR_PROPERTY_TEST("EyeComponent", EyeComponent*, GetEyeComponent, SetEyeComponent);
+	EyeComponent* a = nullptr;
+	CreateProperty(&HeadComponent::Get, &HeadComponent::Set, "EyeComponent");
 }
 
