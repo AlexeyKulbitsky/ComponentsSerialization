@@ -29,12 +29,6 @@ void HeadComponent::RegisterObject()
 {
 	GlobalObjectFactory::GetInstance()->RegisterFactory<HeadComponent>();
 	
-	//S_FIELD_PROPERTY_EXT("EyeComponent", EyeComponent*, Serializable*, eyeComponent);
-
-	//S_ACCESSOR_PROPERTY_EXT("EyeComponent", EyeComponent*, Serializable*, GetEyeComponent, SetEyeComponent);
-	//S_ACCESSOR_PROPERTY_TEST("EyeComponent", EyeComponent*, GetEyeComponent, SetEyeComponent);
-	//CreateProperty(&HeadComponent::Get, &HeadComponent::Set, "EyeComponent");
-
 	S_ACCESSOR_PROPERTY("EyeComponent", Get, Set);
 	S_ACCESSOR_PROPERTY("BrainWeight", GetBrainWeight, SetBrainWeight);
 

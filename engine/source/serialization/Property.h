@@ -153,4 +153,9 @@ Property* CreateProperty(Getter<ClassType, ReturnType> getter, Setter<ClassType,
 
 #define S_ACCESSOR_PROPERTY(name, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateProperty(&ClassType::Getter, &ClassType::Setter, name))
 
+
+//////////////////////////////////////////////////////////////
+
+
+
 #endif

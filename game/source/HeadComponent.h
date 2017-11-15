@@ -13,7 +13,7 @@ public:
 	static void RegisterObject();
 
 	void Set(EyeComponent* c) { eyeComponent = c; }
-	const EyeComponent* Get() const { return eyeComponent; }
+	const EyeComponent& Get() const { return *eyeComponent; }
 
 	void SetBrainWeight(const float weight) { m_brainWeight = weight; }
 	float GetBrainWeight() const { return m_brainWeight; }
