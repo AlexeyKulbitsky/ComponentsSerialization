@@ -16,10 +16,19 @@ public:
 	const std::string& GetName() const;
 
 private:
-	std::string m_name = "noname";
+	std::string m_name = "";
 };
 
-template<typename ClassType, typename FieldType, typename BaseFieldType = FieldType>
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename ClassType, typename ReturnType>
+using Getter = ReturnType(ClassType::*)() const;
+template<typename ClassType, typename ArgumentType>
+using Setter = void (ClassType::*)(ArgumentType);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+template<typename ClassType, typename FieldType>
 class PropertyImpl : public Property
 {
 public:
@@ -29,7 +38,7 @@ public:
 	virtual void SetValue(Serializable* object, const Variant& value) override
 	{
 		ClassType* concreteClass = static_cast<ClassType*>(object);
-		concreteClass->*m_ptr = static_cast<FieldType>(value.Get<BaseFieldType>());
+		concreteClass->*m_ptr = value.Get<FieldType>();
 	}
 	virtual Variant GetValue(Serializable* object) override
 	{
@@ -41,30 +50,32 @@ private:
 	FieldPtr m_ptr = nullptr;
 };
 
+template<typename ClassType, typename FieldType>
+Property* CreateFieldProperty(FieldType ClassType::* fieldPtr, const std::string& name)
+{
+	return new PropertyImpl<ClassType, FieldType>(fieldPtr, name);
+}
+
+#define S_FIELD_PROPERTY(name, field) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateFieldProperty(&ClassType::field, name))
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*template<typename T, bool = std::is_scalar<T>::value, bool = std::is_pointer<T>::value>
-struct ParamTypeTrait
-{
-	using ParamType = T;
-	using ReturnType = T;
-};
-
-template<typename T>
-struct ParamTypeTrait<T, false, false>
-{
-	using ParamType = const T&;
-	using ReturnType = const T&;
-};
-
-template<typename ClassType, typename ValueType, typename ParamTrait, typename BaseValueType = ValueType>
+template<typename ClassType, typename ReturnType, typename ArgumentType>
 class AccessorPropertyImpl : public Property
 {
 public:
-	using GetterPtr = typename ParamTrait::ReturnType (ClassType::*)() const;
-	using SetterPtr = void (ClassType::*) (typename ParamTrait::ParamType);
+	using GetterPtr = ReturnType(ClassType::*)() const;
+	using SetterPtr = void (ClassType::*) (ArgumentType);
 
-	AccessorPropertyImpl(GetterPtr getter, SetterPtr setter, const std::string& name) 
+	static_assert(!std::is_pointer<ReturnType>::value && !std::is_pointer<ArgumentType>::value,
+		"You can not use pointers to create properties");
+
+	static_assert(std::is_same<std::remove_cv<ReturnType>, std::remove_cv<ArgumentType>>::value,
+		"You must use equal types for creating properties");
+
+	using BaseType = std::remove_cv_t<ReturnType>;
+
+	AccessorPropertyImpl(GetterPtr getter, SetterPtr setter, const std::string& name)
 		: Property(name)
 		, m_getter(getter)
 		, m_setter(setter) {}
@@ -72,7 +83,7 @@ public:
 	virtual void SetValue(Serializable* object, const Variant& value) override
 	{
 		ClassType* concreteClass = static_cast<ClassType*>(object);
-		(concreteClass->*m_setter)(static_cast<ValueType>(value.Get<BaseValueType>()));
+		(concreteClass->*m_setter)(value.Get<BaseType>());
 	}
 	virtual Variant GetValue(Serializable* object) override
 	{
@@ -83,43 +94,72 @@ public:
 private:
 	GetterPtr m_getter;
 	SetterPtr m_setter;
-};*/
-
-#define S_FIELD_PROPERTY(name, FieldType, field) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new PropertyImpl<ClassType, FieldType>(&ClassType::field, name))
-
-#define S_FIELD_PROPERTY_EXT(name, FieldType, BaseFieldType, field) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new PropertyImpl<ClassType, FieldType, BaseFieldType>(&ClassType::field, name))
-
-//#define S_ACCESSOR_PROPERTY(name, FieldType, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new AccessorPropertyImpl<ClassType, FieldType, ParamTypeTrait<FieldType>>(&ClassType::Getter, &ClassType::Setter, name))
-
-//#define S_ACCESSOR_PROPERTY_EXT(name, FieldType, BaseFieldType, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(new AccessorPropertyImpl<ClassType, FieldType, ParamTypeTrait<FieldType>, BaseFieldType>(&ClassType::Getter, &ClassType::Setter, name))
-
+};
 
 template<typename ClassType, typename ReturnType, typename ArgumentType>
-class AccessorPropertyImplExt : public Property
+Property* CreateProperty(Getter<ClassType, ReturnType> getter, Setter<ClassType, ArgumentType> setter, const std::string& name)
+{
+	return new AccessorPropertyImpl<ClassType, ReturnType, ArgumentType>(getter, setter, name);
+}
+
+#define S_ACCESSOR_PROPERTY(name, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateProperty(&ClassType::Getter, &ClassType::Setter, name))
+
+//////////////////////////////////////////////////////////////
+
+template<typename ClassType, typename FieldType>
+class EnumPropertyImpl : public Property
+{
+public:
+	using FieldPtr = FieldType ClassType::*;
+
+	static_assert(!std::is_pointer<FieldType>::value, "You can not use pointers to create enumeration properties");
+	static_assert(std::is_enum<FieldType>::value, "You can not create property for non enumeration types");
+
+	EnumPropertyImpl(FieldPtr ptr, const std::string& name) : Property(name), m_ptr(ptr) {}
+	virtual void SetValue(Serializable* object, const Variant& value) override
+	{
+		ClassType* concreteClass = static_cast<ClassType*>(object);
+		concreteClass->*m_ptr = static_cast<FieldType>(value.GetInt());
+	}
+	virtual Variant GetValue(Serializable* object) override
+	{
+		ClassType* concreteClass = static_cast<ClassType*>(object);
+		return Variant(static_cast<int>(concreteClass->*m_ptr));
+	}
+
+private:
+	FieldPtr m_ptr = nullptr;
+};
+
+template<typename ClassType, typename FieldType>
+Property* CreateEnumProperty(FieldType ClassType::* fieldPtr, const std::string& name)
+{
+	return new EnumPropertyImpl<ClassType, FieldType>(fieldPtr, name);
+}
+
+#define S_ENUM_PROPERTY(name, field) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateEnumProperty(&ClassType::field, name))
+
+//////////////////////////////////////////////////////////////
+
+template<typename ClassType, typename ReturnType, typename ArgumentType>
+class AccessorEnumPropertyImplExt : public Property
 {
 public:
 	using GetterPtr = ReturnType(ClassType::*)() const;
 	using SetterPtr = void (ClassType::*) (ArgumentType);
 
-	using NoPtrReturnType = std::remove_pointer<ReturnType>;
-	using NoPtrArgumentType = std::remove_pointer<ArgumentType>;
+	static_assert(!std::is_pointer<ReturnType>::value && !std::is_pointer<ArgumentType>::value,
+		"You can not use pointers to create enumeration properties");
 
-	static_assert(std::is_same<NoPtrReturnType, NoPtrReturnType>::value, 
-				  "The return and argument type differs from each other");
+	static_assert(std::is_enum<ReturnType>::value && std::is_enum<ArgumentType>::value,
+		"You must use Getter/Setters that operate with enumeration types");
 
-	template<typename T, bool = std::is_base_of<Serializable, T>::value>
-	struct BaseType
-	{
-		using Type = T;
-	};
+	static_assert(std::is_same<std::remove_cv<ReturnType>, std::remove_cv<ArgumentType>>::value,
+		"You must use equal types for creating enumeration properties");
+	
+	using BaseType = std::remove_cv_t<ReturnType>;
 
-	template<typename T>
-	struct BaseType<T, true>
-	{
-		using Type = Serializable*;
-	};
-
-	AccessorPropertyImplExt(GetterPtr getter, SetterPtr setter, const std::string& name)
+	AccessorEnumPropertyImplExt(GetterPtr getter, SetterPtr setter, const std::string& name)
 		: Property(name)
 		, m_getter(getter)
 		, m_setter(setter) {}
@@ -127,12 +167,12 @@ public:
 	virtual void SetValue(Serializable* object, const Variant& value) override
 	{
 		ClassType* concreteClass = static_cast<ClassType*>(object);
-		(concreteClass->*m_setter)((ArgumentType)value.Get<BaseType<std::remove_pointer_t<ReturnType>>::Type>());
+		(concreteClass->*m_setter)(static_cast<ArgumentType>(value.GetInt()));
 	}
 	virtual Variant GetValue(Serializable* object) override
 	{
 		ClassType* concreteClass = static_cast<ClassType*>(object);
-		return Variant((BaseType<std::remove_pointer_t<ReturnType>>::Type)(concreteClass->*m_getter)());
+		return Variant(static_cast<int>((concreteClass->*m_getter)()));
 	}
 
 private:
@@ -140,22 +180,13 @@ private:
 	SetterPtr m_setter;
 };
 
-template<typename ClassType, typename ReturnType>
-using Getter = ReturnType (ClassType::*)() const;
-template<typename ClassType, typename ArgumentType>
-using Setter = void (ClassType::*)(ArgumentType);
-
 template<typename ClassType, typename ReturnType, typename ArgumentType>
-Property* CreateProperty(Getter<ClassType, ReturnType> getter, Setter<ClassType, ArgumentType> setter, const std::string& name)
+Property* CreateEnumAccessorProperty(Getter<ClassType, ReturnType> getter, Setter<ClassType, ArgumentType> setter, const std::string& name)
 {
-	return new AccessorPropertyImplExt<ClassType, ReturnType, ArgumentType>(getter, setter, name);
+	return new AccessorEnumPropertyImplExt<ClassType, ReturnType, ArgumentType>(getter, setter, name);
 }
 
-#define S_ACCESSOR_PROPERTY(name, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateProperty(&ClassType::Getter, &ClassType::Setter, name))
-
-
-//////////////////////////////////////////////////////////////
-
+#define S_ENUM_ACCESSOR_PROPERTY(name, Getter, Setter) GlobalObjectFactory::GetInstance()->RegisterProperty<ClassType>(CreateEnumAccessorProperty(&ClassType::Getter, &ClassType::Setter, name))
 
 
 #endif

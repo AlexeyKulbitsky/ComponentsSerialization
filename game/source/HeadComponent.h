@@ -8,18 +8,26 @@ class HeadComponent : public Component
 {
 	SHADOW_OBJECT(HeadComponent)
 public:
-	HeadComponent();
-	virtual const char* GetName() const override;
-	static void RegisterObject();
+	enum class SizeType
+	{
+		Small = 0,
+		Medium,
+		Big,
+		Extra
+	};
 
-	void Set(EyeComponent* c) { eyeComponent = c; }
-	const EyeComponent& Get() const { return *eyeComponent; }
+	HeadComponent();
+	static void RegisterObject();
 
 	void SetBrainWeight(const float weight) { m_brainWeight = weight; }
 	float GetBrainWeight() const { return m_brainWeight; }
 
+	void SetSizeEnum(const SizeType size) { m_sizeType = size; }
+	SizeType GetSizeEnum() const { return m_sizeType; }
+
+	SizeType m_sizeType = SizeType::Small;
+
 private:
-	EyeComponent* eyeComponent = nullptr;
 	float m_brainWeight = 2.3f;
 };
 

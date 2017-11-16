@@ -103,8 +103,8 @@ int main()
 	auto factory = GlobalObjectFactory::GetInstance();
 	auto headComponentProperties = factory->GetProperties<HeadComponent>();
 
-	auto eyeComponentProperty = headComponentProperties->at("EyeComponent");
-	eyeComponentProperty->SetValue(headComponent, eyeComponent);
+	auto headEnumG = headComponentProperties->at("HeadSizeEnumGetter");
+	headEnumG->SetValue(headComponent, 1);
 
 	headComponent->Serialize();
 

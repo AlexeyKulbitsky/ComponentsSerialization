@@ -8,11 +8,8 @@ class EyeComponent : public Component
 	SHADOW_OBJECT(EyeComponent)
 public:
 	EyeComponent();
-	virtual const char* GetName() const override;
 	static void RegisterObject();
 	virtual void PrintDebugInfo() override;
-
-	friend std::ostream& operator<<(std::ostream&, const EyeComponent&);
 
 	int size = 0;
 	float depth = 0.0f;

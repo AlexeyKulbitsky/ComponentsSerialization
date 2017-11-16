@@ -8,7 +8,6 @@ class Component : public Serializable
 {
 public:
 	Component();
-	virtual const char* GetName() const override;
 };
 
 #endif

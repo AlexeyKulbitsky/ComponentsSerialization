@@ -13,7 +13,6 @@ class Serializable
 {
 	SHADOW_OBJECT(Serializable)
 public:
-	virtual const char* GetName() const = 0;
 	virtual void PrintDebugInfo() {}
 	virtual void Serialize();
 };

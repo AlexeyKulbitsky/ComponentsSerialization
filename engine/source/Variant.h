@@ -96,7 +96,7 @@ public:
 	Serializable* GetSerializable() const;
 
 	template<typename T>
-	T Get() const;// { return T(); }
+	T Get() const;
 
 	VariantType GetType() const { return m_type; }
 
