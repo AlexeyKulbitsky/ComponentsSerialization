@@ -16,6 +16,8 @@ void HeadComponent::RegisterObject()
 	S_ENUM_PROPERTY("HeadSize", m_sizeType);
 	S_ENUM_ACCESSOR_PROPERTY("HeadSizeEnumGetter", GetSizeEnum, SetSizeEnum);
 
+	S_ACCESSOR_PROPERTY("MyStruct", GetMyStruct, SetMyStruct);
+
 	int a = 0;
 	a++;
 }

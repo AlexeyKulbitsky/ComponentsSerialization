@@ -10,15 +10,24 @@ enum VariantType
 	VAR_FLOAT,
 	VAR_BOOL,
 	VAR_STRING,
-	VAR_SERIALIZABLE
+	VAR_SERIALIZABLE,
+	VAR_CUSTOM
 };
 
 class Serializable;
 
-struct SerializableRef
+class CustomValue
 {
-	SerializableRef(Serializable* s) : ref(s) {}
-	Serializable* ref;
+
+};
+
+template<typename T>
+class CustomValueImpl : public CustomValue
+{
+public:
+	CustomValueImpl(const T& value) : m_value(value) { }
+
+	T m_value;
 };
 
 class Variant
@@ -52,6 +61,15 @@ public:
 		: m_type(VAR_NOTYPE)
 	{
 		*this = value;
+	}
+
+	template<typename T>
+	Variant(const T& value)
+	{
+		int a = 0;
+		a++;
+
+		m_customValue = new CustomValueImpl<T>(value);
 	}
 
 	Variant& operator=(int value)
@@ -96,7 +114,10 @@ public:
 	Serializable* GetSerializable() const;
 
 	template<typename T>
-	T Get() const;
+	T Get() const
+	{
+		return static_cast<CustomValueImpl<T>*>(m_customValue)->m_value;
+	}
 
 	VariantType GetType() const { return m_type; }
 
@@ -110,7 +131,7 @@ private:
 		bool m_bool;
 		void* m_ptr;
 	};
-
+	CustomValue* m_customValue = nullptr;
 	VariantType m_type = VAR_NOTYPE;
 };
 

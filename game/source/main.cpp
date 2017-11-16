@@ -69,26 +69,6 @@ namespace tuple_test
 }
 
 
-//namespace 
-
-
-enum class MyEnum
-{
-	First,
-	Second,
-	Third
-};
-
-template <typename ... T> void null(T...) {}
-
-template <typename ... T>
-constexpr size_t countLength(T ... args)
-{
-	null(args...); //kill warnings
-	return sizeof...(args);
-}
-
-
 int main()
 {
 	EyeComponent::RegisterObject();
@@ -106,16 +86,16 @@ int main()
 	auto headEnumG = headComponentProperties->at("HeadSizeEnumGetter");
 	headEnumG->SetValue(headComponent, 1);
 
+	auto myStructProperty = headComponentProperties->at("MyStruct");
+	TestStruct myTestStruct;
+	myStructProperty->SetValue(headComponent, myTestStruct);
+
 	headComponent->Serialize();
 
 	tuple_test::Tuple<int, double, int> t(12, 2.34, 89);
 	std::cout << tuple_test::Get<0>(t) << " " << tuple_test::Get<1>(t) << " " << tuple_test::Get<2>(t) << std::endl;
 
-	bool isEnum = std::is_enum<MyEnum>::value;
-	auto m = std::numeric_limits<enum class MyEnum>::max();
-	MyEnum e = MyEnum::First;
-	auto enumLength = countLength(e);
-
+	
 	int a = 0;
 	a++;
 
